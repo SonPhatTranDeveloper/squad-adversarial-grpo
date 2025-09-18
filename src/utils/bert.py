@@ -2,9 +2,6 @@ import logging
 
 import evaluate
 from transformers import (
-    AutoModelForQuestionAnswering,
-    AutoTokenizer,
-    Pipeline,
     pipeline,
 )
 
@@ -12,19 +9,29 @@ logger = logging.getLogger(__name__)
 
 
 class BertQuestionAnswering:
-    def __init__(self, model_name: str) -> None:
+    def __init__(
+        self,
+        model_name: str = "distilbert-base-uncased-distilled-squad",
+        device: str = "auto",
+        max_length: int = 512,
+        max_answer_length: int = 30,
+    ) -> None:
         """Initialize the QA model, tokenizer, pipeline, and metrics.
 
         Args:
             model_name: Hugging Face model name or path for a QA model.
         """
         self.model_name = model_name
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForQuestionAnswering.from_pretrained(model_name)
-        self.qa_pipeline: Pipeline = pipeline(
-            task="question-answering",
-            model=self.model,
-            tokenizer=self.tokenizer,
+        self.device = device
+        self.max_length = max_length
+        self.max_answer_length = max_answer_length
+        self.qa_pipeline = pipeline(
+            "question-answering",
+            model=self.model_name,
+            tokenizer=self.model_name,
+            device=self.device,
+            max_seq_len=self.max_length,
+            max_answer_len=self.max_answer_length,
         )
         self.squad_metric = evaluate.load("squad")
 
