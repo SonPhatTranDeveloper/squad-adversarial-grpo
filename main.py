@@ -1,24 +1,12 @@
-"""Entry point for the grpo-adv-prompter-squad package."""
-
-from __future__ import annotations
-
-import logging
-
-logger = logging.getLogger(__name__)
+from src.utils.datasets import load_csv_dataset
+import hydra
 
 
+@hydra.main(config_path="src/config", config_name="main_config.yaml")
 def main() -> None:
-    """Run the CLI entry point.
-
-    Args:
-        None
-
-    Returns:
-        None
-    """
-    logger.info("Hello from grpo-adv-prompter-squad!")
+    """Main function."""
+    dataset = load_csv_dataset(config.dataset.path)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     main()
