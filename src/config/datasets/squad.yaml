@@ -1,0 +1,2 @@
+# Dataset configuration for SQuAD
+path: "data/squad_golden.csv"
