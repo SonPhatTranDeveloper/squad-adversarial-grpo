@@ -58,6 +58,23 @@ class BertQuestionAnswering:
             "exact_match": float(metrics.get("exact_match", 0.0)),
         }
 
+    def get_answers(self, contexts: list[str], questions: list[str]) -> list[dict[str, any]]:
+        """
+        Get the answers for the given contexts and questions.
+
+        Args:
+            contexts: The contexts to answer the question.
+            questions: The questions to answer.
+
+        Returns:
+            The answers for the given contexts and questions.
+        """
+        inputs = [
+            {"context": context, "question": question}
+            for context, question in zip(contexts, questions, strict=False)
+        ]
+        return self.qa_pipeline(inputs)
+
     def calculate_reduction_metrics(
         self,
         contexts: list[str],
@@ -93,22 +110,13 @@ class BertQuestionAnswering:
         )
 
         # Run QA pipeline to get detailed predictions (answer text and spans)
-        original_inputs = [
-            {"context": context, "question": question}
-            for context, question in zip(contexts, questions, strict=False)
-        ]
-        modified_inputs = [
-            {"context": context, "question": question}
-            for context, question in zip(modified_contexts, questions, strict=False)
-        ]
-
-        logger.debug("Running QA pipeline on original contexts: %d items", len(original_inputs))
-        original_results = self.qa_pipeline(original_inputs)
+        logger.debug("Running QA pipeline on original contexts: %d items", len(contexts))
+        original_results = self.get_answers(contexts, questions)
         if isinstance(original_results, dict):
             original_results = [original_results]
 
-        logger.debug("Running QA pipeline on modified contexts: %d items", len(modified_inputs))
-        modified_results = self.qa_pipeline(modified_inputs)
+        logger.debug("Running QA pipeline on modified contexts: %d items", len(modified_contexts))
+        modified_results = self.get_answers(modified_contexts, questions)
         if isinstance(modified_results, dict):
             modified_results = [modified_results]
 
@@ -129,8 +137,15 @@ class BertQuestionAnswering:
             gold_start = int(golden_answers_start_idx[idx])
             gold_end = int(golden_answers_end_idx[idx])
 
+            # Calculate the context length difference
+            original_context_length = len(contexts[idx])
+            modified_context_length = len(modified_contexts[idx])
+            context_length_difference = abs(original_context_length - modified_context_length)
+
             original_diff = abs(original_start - gold_start) + abs(original_end - gold_end)
-            modified_diff = abs(modified_start - gold_start) + abs(modified_end - gold_end)
+            modified_diff = abs(modified_start - (gold_start + context_length_difference)) + abs(
+                modified_end - (gold_end + context_length_difference)
+            )
             span_reductions.append(int(modified_diff - original_diff))
 
         avg_span_reduction = (
