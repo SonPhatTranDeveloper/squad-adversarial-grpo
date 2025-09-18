@@ -31,7 +31,7 @@ def load_csv_dataset(path: str) -> Dataset:
         A Hugging Face Dataset.
     """
     # Load dataset
-    dataset = load_dataset("csv", data_files=path)
+    dataset = load_dataset("csv", data_files=path, split="train")
 
     # Assert if the dataset has the correct columns
     assert_dataset_has_correct_columns(dataset)
