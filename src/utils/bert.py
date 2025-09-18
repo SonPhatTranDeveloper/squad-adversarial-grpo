@@ -131,7 +131,7 @@ class BertQuestionAnswering:
 
             original_diff = abs(original_start - gold_start) + abs(original_end - gold_end)
             modified_diff = abs(modified_start - gold_start) + abs(modified_end - gold_end)
-            span_reductions.append(int(original_diff - modified_diff))
+            span_reductions.append(abs(original_diff - modified_diff))
 
         avg_span_reduction = (
             float(sum(span_reductions)) / float(len(span_reductions)) if span_reductions else 0.0
