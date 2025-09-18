@@ -34,7 +34,6 @@ select = [
     "UP",  # pyupgrade
     "B",   # flake8-bugbear
     "N",   # pep8-naming
-    "D",   # pydocstyle
     "ANN", # flake8-annotations
 ]
 ignore = [
