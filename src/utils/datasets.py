@@ -45,7 +45,7 @@ def create_user_prompt(context: str, question: str, answer: str) -> str:
     model to answer `question` incorrectly. The generator must output exactly one
     sentence and nothing else.
     """
-    return f"""You are asked to produce a single adversarial sentence to be prepended to a passage
+    return f"""You are asked to produce a single adversarial sentence to be added in front of the context
 so that a language model is likely to answer the question incorrectly.
 
 Requirements (must follow exactly):
