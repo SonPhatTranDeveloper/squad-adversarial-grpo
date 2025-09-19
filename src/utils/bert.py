@@ -12,7 +12,7 @@ class BertQuestionAnswering:
     def __init__(
         self,
         model_name: str = "distilbert-base-uncased-distilled-squad",
-        device: str = "auto",
+        device: str = "cuda",
         max_length: int = 512,
         max_answer_length: int = 30,
     ) -> None:
