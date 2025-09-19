@@ -25,9 +25,9 @@ DATASET_CSV = os.environ.get(
 )
 OUTPUT_DIR = os.environ.get(
     "OUTPUT_DIR",
-    os.path.join(PROJECT_ROOT, "outputs", "qwen2.5-7b-grpo"),
+    os.path.join(PROJECT_ROOT, "outputs", "qwen2.5-3b-grpo"),
 )
-MODEL_ID = os.environ.get("MODEL_ID", "Qwen/Qwen2.5-7B-Instruct")
+MODEL_ID = os.environ.get("MODEL_ID", "Qwen/Qwen2.5-3B-Instruct")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 logger.info("Output dir: %s", OUTPUT_DIR)
