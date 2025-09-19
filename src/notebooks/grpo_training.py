@@ -8,7 +8,7 @@ from transformers import AutoModelForCausalLM, PreTrainedModel
 from trl import GRPOConfig, GRPOTrainer
 
 from src.utils.datasets import load_csv_dataset
-from src.utils.rewards import bert_reward, format_reward
+from src.utils.rewards import answer_reward, bert_reward, format_reward, think_reward
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -99,6 +99,7 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         num_train_epochs=1,
         bf16=True,
         per_device_train_batch_size=1,
+        temperature=1.0,
         # Preprocessing controls
         max_completion_length=2048,
         num_generations=16,
@@ -126,7 +127,12 @@ def create_trainer(
     Returns:
         An initialized `trl.GRPOTrainer` instance.
     """
-    reward_funcs: list[Callable[..., list[float]]] = [format_reward, bert_reward]
+    reward_funcs: list[Callable[..., list[float]]] = [
+        format_reward,
+        think_reward,
+        answer_reward,
+        bert_reward,
+    ]
     trainer = GRPOTrainer(
         model=model,
         reward_funcs=reward_funcs,

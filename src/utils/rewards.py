@@ -8,6 +8,11 @@ F1_WEIGHT = 1.0
 EXACT_MATCH_WEIGHT = 1.0
 SPAN_DIFFERENCE_WEIGHT = 0.5
 
+# Rewards for format adherence
+THINK_REWARD = 0.5
+ANSWER_REWARD = 1.0
+FULL_REWARD = 0.5
+
 
 def format_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any]) -> list[float]:
     """
@@ -29,7 +34,55 @@ def format_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, a
     pattern = re.compile(r"<think>.*?</think>.*?<answer>.*?</answer>", re.DOTALL)
     completion_contents = [completion[0]["content"] for completion in completions]
     matches = [bool(pattern.search(content)) for content in completion_contents]
-    return [1.0 if match else 0.0 for match in matches]
+    return [FULL_REWARD if match else 0.0 for match in matches]
+
+
+def think_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any]) -> list[float]:
+    """
+    Reward function that returns 1.0 if a completion contains a
+    <think>...</think> section, else 0.0.
+
+    Args:
+        completions: List of completions of the format:
+        [
+            [
+                {"role": "user", "content": "..."},
+                {"role": "assistant", "content": "..."},
+            ]
+        ]
+
+    Returns:
+        List of rewards.
+    """
+    think_pattern = re.compile(r"<think>.*?</think>", re.DOTALL)
+    completion_contents = [completion[0]["content"] for completion in completions]
+    return [
+        THINK_REWARD if think_pattern.search(content) else 0.0 for content in completion_contents
+    ]
+
+
+def answer_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any]) -> list[float]:
+    """
+    Reward function that returns 1.0 if a completion contains an
+    <answer>...</answer> section, else 0.0.
+
+    Args:
+        completions: List of completions of the format:
+        [
+            [
+                {"role": "user", "content": "..."},
+                {"role": "assistant", "content": "..."},
+            ]
+        ]
+
+    Returns:
+        List of rewards.
+    """
+    answer_pattern = re.compile(r"<answer>.*?</answer>", re.DOTALL)
+    completion_contents = [completion[0]["content"] for completion in completions]
+    return [
+        ANSWER_REWARD if answer_pattern.search(content) else 0.0 for content in completion_contents
+    ]
 
 
 _qa_model: BertQuestionAnswering | None = None

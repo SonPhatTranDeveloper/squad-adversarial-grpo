@@ -16,6 +16,7 @@ SYSTEM_PROMPT = (
     "No additional text, explanations, or deviations are allowed outside of these tags."
 )
 
+
 def assert_dataset_has_correct_columns(dataset: Dataset) -> None:
     """Assert if the dataset has the correct columns."""
     assert "id" in dataset.column_names, "Dataset must have an 'id' column"
