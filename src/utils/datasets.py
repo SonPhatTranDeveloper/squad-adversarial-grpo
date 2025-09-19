@@ -45,8 +45,6 @@ so that a language model is likely to answer the question incorrectly.
 Requirements (must follow exactly):
 - The sentence must be in the same language, register, and style as the context and must be
   coherent if read together with the context.
-- The sentence should be plausible and natural (not nonsensical or obviously contradictory).
-- Do NOT repeat the question or the ground-truth answer verbatim.
 - The adversarial sentence should be short-to-medium length (roughly 8–30 words) and grammatically well-formed.
 - The sentence should be crafted to subtly bias or mislead a language model toward an incorrect answer
   while remaining contextually plausible.
