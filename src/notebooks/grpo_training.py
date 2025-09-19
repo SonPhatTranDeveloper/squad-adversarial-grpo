@@ -8,7 +8,13 @@ from transformers import AutoModelForCausalLM, PreTrainedModel
 from trl import GRPOConfig, GRPOTrainer
 
 from src.utils.datasets import load_csv_dataset
-from src.utils.rewards import answer_reward, bert_reward, format_reward, think_reward
+from src.utils.rewards import (
+    answer_reward,
+    bert_reward,
+    format_reward,
+    multi_think_reward,
+    think_reward,
+)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -132,6 +138,7 @@ def create_trainer(
         think_reward,
         answer_reward,
         bert_reward,
+        multi_think_reward,
     ]
     trainer = GRPOTrainer(
         model=model,

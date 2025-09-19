@@ -10,6 +10,7 @@ SPAN_DIFFERENCE_WEIGHT = 0.5
 
 # Rewards for format adherence
 THINK_REWARD = 0.5
+THINK_REWARD_MULTIPLE = 0.1
 ANSWER_REWARD = 1.0
 FULL_REWARD = 0.5
 
@@ -83,6 +84,37 @@ def answer_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, a
     return [
         ANSWER_REWARD if answer_pattern.search(content) else 0.0 for content in completion_contents
     ]
+
+
+def multi_think_reward(
+    completions: list[list[dict[str, str]]], **kwargs: dict[str, any]
+) -> list[float]:
+    """
+    Reward function that promotes multiple <think>...</think> sections.
+
+    Each <think> block contributes `THINK_REWARD` to the score, capped at
+    `ANSWER_REWARD` to keep the scale comparable to other rewards.
+
+    Args:
+        completions: List of completions of the format:
+        [
+            [
+                {"role": "user", "content": "..."},
+                {"role": "assistant", "content": "..."},
+            ]
+        ]
+
+    Returns:
+        List of rewards.
+    """
+    think_pattern = re.compile(r"<think>.*?</think>", re.DOTALL)
+    completion_contents = [completion[0]["content"] for completion in completions]
+    rewards: list[float] = []
+    for content in completion_contents:
+        count = len(think_pattern.findall(content))
+        reward = min(count * THINK_REWARD_MULTIPLE, THINK_REWARD)
+        rewards.append(reward)
+    return rewards
 
 
 _qa_model: BertQuestionAnswering | None = None
