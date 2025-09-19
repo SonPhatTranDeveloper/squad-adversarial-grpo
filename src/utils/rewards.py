@@ -11,8 +11,8 @@ SPAN_DIFFERENCE_WEIGHT = 0.5
 
 def format_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any]) -> list[float]:
     """
-    Reward function that checks if the reasoning process is enclosed within <think> and </think> tags,
-    while the final answer is enclosed within <answer> and </answer> tags.
+    Reward function that checks if a completion contains <think>...</think> and
+    <answer>...</answer> sections.
 
     Args:
         completions: List of completions of the format:
@@ -26,11 +26,9 @@ def format_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, a
     Returns:
         List of rewards.
     """
-    pattern = r"^<think>\n.*?\n</think>\n<answer>\n.*?\n</answer>$"
+    pattern = re.compile(r"<think>.*?</think>.*?<answer>.*?</answer>", re.DOTALL)
     completion_contents = [completion[0]["content"] for completion in completions]
-    matches = [
-        re.match(pattern, content, re.DOTALL | re.MULTILINE) for content in completion_contents
-    ]
+    matches = [bool(pattern.search(content)) for content in completion_contents]
     return [1.0 if match else 0.0 for match in matches]
 
 

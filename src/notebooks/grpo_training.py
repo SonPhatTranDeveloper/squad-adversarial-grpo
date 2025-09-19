@@ -89,19 +89,19 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
     """
     return GRPOConfig(
         output_dir=output_dir,
-        learning_rate=5e-6,
+        learning_rate=1e-5,
         weight_decay=0.01,
         warmup_ratio=0.1,
         lr_scheduler_type="linear",
         optim="adamw_8bit",
         remove_unused_columns=False,
-        gradient_accumulation_steps=16,
+        gradient_accumulation_steps=4,
         num_train_epochs=1,
         bf16=True,
         per_device_train_batch_size=1,
         # Preprocessing controls
         max_completion_length=2048,
-        num_generations=8,
+        num_generations=16,
         max_prompt_length=4096,
         # Logging and saving
         report_to=["tensorboard"],
