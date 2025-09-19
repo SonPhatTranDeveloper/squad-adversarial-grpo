@@ -1,7 +1,7 @@
 import re
 
-from utils.bert import BERT_QA
-from utils.string import extract_answer, format_sentence
+from src.utils.bert import BertQuestionAnswering
+from src.utils.string import extract_answer, format_sentence
 
 # Define the weights for the reduction metrics
 F1_WEIGHT = 1.0
@@ -34,6 +34,9 @@ def format_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, a
     return [1.0 if match else 0.0 for match in matches]
 
 
+_qa_model: BertQuestionAnswering | None = None
+
+
 def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any]) -> list[float]:
     """
     Compute reward based on the reduction metrics of the BERT QA model.
@@ -50,12 +53,12 @@ def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any
     Returns:
         List of rewards.
     """
-    # Get the relevant items
-    contexts = kwargs["contexts"]
-    questions = kwargs["questions"]
-    golden_answers = kwargs["answers"]
-    golden_answers_start_idx = kwargs["answers_start_idx"]
-    golden_answers_end_idx = kwargs["answers_end_idx"]
+    # Get the relevant items from dataset columns
+    contexts = kwargs["context"]
+    questions = kwargs["question"]
+    golden_answers = kwargs["answer"]
+    golden_answers_start_idx = kwargs["answer_start_char_idx"]
+    golden_answers_end_idx = kwargs["answer_end_char_idx"]
 
     # Get the completions
     completions = [completion[0]["content"] for completion in completions]
@@ -69,14 +72,19 @@ def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any
         for context, answer in zip(contexts, answers, strict=False)
     ]
 
+    # Lazily initialize QA model to avoid heavy init at import
+    global _qa_model
+    if _qa_model is None:
+        _qa_model = BertQuestionAnswering()
+
     # Calculate the reduction metrics
-    metrics = BERT_QA.calculate_reduction_metrics(
-        contexts,
-        modified_contexts,
-        questions,
-        golden_answers,
-        golden_answers_start_idx,
-        golden_answers_end_idx,
+    metrics = _qa_model.calculate_reduction_metrics(
+        contexts=contexts,
+        modified_contexts=modified_contexts,
+        questions=questions,
+        golden_answers=golden_answers,
+        golden_answers_start_idx=golden_answers_start_idx,
+        golden_answers_end_idx=golden_answers_end_idx,
     )
 
     return [

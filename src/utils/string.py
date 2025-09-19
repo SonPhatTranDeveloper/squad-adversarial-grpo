@@ -12,7 +12,10 @@ def extract_answer(response: str) -> str:
     Returns:
         The answer from the response between <answer> and </answer> tags.
     """
-    return re.search(r"<answer>(.*?)</answer>", response).group(1)
+    result = re.search(r"<answer>(.*?)</answer>", response)
+    if result is None:
+        return ""
+    return result.group(1)
 
 
 def format_sentence(sentence: str) -> str:
