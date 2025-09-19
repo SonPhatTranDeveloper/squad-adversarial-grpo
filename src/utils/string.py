@@ -1,0 +1,40 @@
+import re
+
+
+def extract_answer(response: str) -> str:
+    """
+    Extract the answer from the response.
+
+    Args:
+        response: The response to extract the answer from.
+        response contains <answer> and </answer> tags.
+
+    Returns:
+        The answer from the response between <answer> and </answer> tags.
+    """
+    return re.search(r"<answer>(.*?)</answer>", response).group(1)
+
+
+def format_sentence(sentence: str) -> str:
+    """
+    Add a period and a space to the end of the sentence if it doesn't have one.
+
+    Example:
+        "Hello, world" -> "Hello, world. "
+
+    Args:
+        sentence: The sentence to format.
+
+    Returns:
+        The formatted sentence.
+    """
+    sentence_stripped = sentence.rstrip()
+
+    if sentence_stripped == "":
+        return ""
+
+    last_char = sentence_stripped[-1]
+    if last_char in ".!?":
+        return sentence_stripped + " "
+
+    return sentence_stripped + ". "

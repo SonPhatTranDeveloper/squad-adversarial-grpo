@@ -90,7 +90,7 @@ class BertQuestionAnswering:
         golden_answers: list[str],
         golden_answers_start_idx: list[int],
         golden_answers_end_idx: list[int],
-    ) -> dict[str, float]:
+    ) -> list[dict[str, float]]:
         """
         Calculate the reduction metrics for the answer.
 
@@ -116,51 +116,39 @@ class BertQuestionAnswering:
             "golden_answers_end_idx must align with golden_answers"
         )
 
-        # Run QA pipeline to get detailed predictions (answer text and spans)
-        logger.debug("Running QA pipeline on original contexts: %d items", len(contexts))
-        original_results = self.get_answers(contexts, questions)
-        if isinstance(original_results, dict):
-            original_results = [original_results]
-
+        # Run QA pipeline only on modified contexts and compare to golden answers
         logger.debug("Running QA pipeline on modified contexts: %d items", len(modified_contexts))
         modified_results = self.get_answers(modified_contexts, questions)
         if isinstance(modified_results, dict):
             modified_results = [modified_results]
 
-        original_answers = [r.get("answer", "") for r in original_results]
-        modified_answers = [r.get("answer", "") for r in modified_results]
+        per_item_metrics: list[dict[str, float]] = []
+        for idx, mod in enumerate(modified_results):
+            modified_answer = str(mod.get("answer", ""))
 
-        # Compute F1/EM reduction directly
-        original_metrics = self._calculate_metrics(original_answers, golden_answers)
-        modified_metrics = self._calculate_metrics(modified_answers, golden_answers)
+            # Per-item F1/EM against golden answer
+            modified_metrics = self._calculate_metrics([modified_answer], [golden_answers[idx]])
 
-        # Compute average span difference reduction across the batch
-        span_reductions: list[int] = []
-        for idx, (orig, mod) in enumerate(zip(original_results, modified_results, strict=False)):
-            original_start = int(orig.get("start", -1))
-            original_end = int(orig.get("end", -1))
+            # Span difference relative to golden span adjusted by context length delta
             modified_start = int(mod.get("start", -1))
             modified_end = int(mod.get("end", -1))
             gold_start = int(golden_answers_start_idx[idx])
             gold_end = int(golden_answers_end_idx[idx])
 
-            # Calculate the context length difference
             original_context_length = len(contexts[idx])
             modified_context_length = len(modified_contexts[idx])
             context_length_difference = abs(original_context_length - modified_context_length)
 
-            original_diff = abs(original_start - gold_start) + abs(original_end - gold_end)
-            modified_diff = abs(modified_start - (gold_start + context_length_difference)) + abs(
+            span_difference = abs(modified_start - (gold_start + context_length_difference)) + abs(
                 modified_end - (gold_end + context_length_difference)
             )
-            span_reductions.append(int(modified_diff - original_diff))
 
-        avg_span_reduction = (
-            float(sum(span_reductions)) / float(len(span_reductions)) if span_reductions else 0.0
-        )
+            per_item_metrics.append(
+                {
+                    "f1": float(modified_metrics["f1"]),
+                    "exact_match": float(modified_metrics["exact_match"]),
+                    "span_difference": float(int(span_difference)) / modified_context_length,
+                }
+            )
 
-        return {
-            "f1": float(original_metrics["f1"] - modified_metrics["f1"]),
-            "exact_match": float(original_metrics["exact_match"] - modified_metrics["exact_match"]),
-            "span_difference": avg_span_reduction,
-        }
+        return per_item_metrics
