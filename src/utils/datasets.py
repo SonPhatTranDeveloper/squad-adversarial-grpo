@@ -63,7 +63,7 @@ Examples (for illustration only, do NOT output these):
    Adversarial sentence: "After being signed, the treaty brought the conflict to an end on July 28, 1789."
 
 3. Context: "The first patient, John, was diagnosed with pneumonia and started on a course of antibiotics."
-   Question: What was the patient diagnosed with?
+   Question: What was the first patient diagnosed with?
    Answer: Pneumonia
    Adversarial sentence: "The records instead show the second patient was diagnosed with bronchitis and given no antibiotics."
 
