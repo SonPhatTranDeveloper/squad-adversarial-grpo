@@ -20,7 +20,7 @@ logger = logging.getLogger("grpo_training")
 # Paths and config
 DATASET_CSV = "/workspace/squad-adversarial-grpo/data/squad_golden.csv"
 OUTPUT_DIR = "/workspace/squad-adversarial-grpo/outputs/qwen2.5-7b-grpo"
-MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
+MODEL_ID = "Qwen/Qwen2.5-3B-Instruct"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 logger.info("Output dir: %s", OUTPUT_DIR)
