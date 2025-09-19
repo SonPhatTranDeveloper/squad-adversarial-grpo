@@ -14,7 +14,7 @@ def extract_answer(response: str) -> str:
     """
     result = re.search(r"<answer>(.*?)</answer>", response)
     if result is None:
-        return ""
+        return response
     return result.group(1)
 
 
