@@ -17,7 +17,7 @@ logger = logging.getLogger("grpo_training")
 # Paths and config (override via environment variables if set)
 PROJECT_ROOT = os.environ.get(
     "PROJECT_ROOT",
-    "/Users/sonphat.tran/grpo_adv_prompter_squad",
+    "/workspace/squad-adversarial-grpo/",
 )
 DATASET_CSV = os.environ.get(
     "DATASET_CSV",
@@ -62,8 +62,7 @@ def create_lora_model(model_id: str) -> PreTrainedModel:
     """
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        torch_dtype="auto",
-        device_map="auto",
+        device_map="cuda",
     )
 
     lora_cfg = LoraConfig(
