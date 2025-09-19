@@ -54,6 +54,7 @@ Requirements (must follow exactly):
 - The adversarial sentence should be short-to-medium length (roughly 8–30 words) and grammatically well-formed.
 - The sentence should be crafted to subtly bias or mislead a language model toward an incorrect answer
   while remaining contextually plausible.
+- The adversarial sentence should be placed in front of the context.
 
 Examples (for illustration only, do NOT output these):
 1. Context: "In the ninth inning, the crowd rose as the home team celebrated their comeback win led by García."
