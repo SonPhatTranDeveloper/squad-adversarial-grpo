@@ -42,6 +42,8 @@ select = [
 ignore = [
     "D203",   # one-blank-line-before-class (conflicts with D211)
     "D213",   # multi-line-summary-second-line (prefer Google style)
+    "E203", 
+    "E501",
 ]
 fixable = ["ALL"]
 
