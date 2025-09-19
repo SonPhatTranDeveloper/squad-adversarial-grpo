@@ -3,12 +3,20 @@ from collections.abc import Callable
 from datasets import Dataset, load_dataset
 
 SYSTEM_PROMPT = (
-    "A conversation between User and Assistant. The user asks a question, and the Assistant solves it. "
-    "The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. "
-    "The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, "
-    "Your response MUST match the following format: <think>(reasoning process here.)</think><answer>(answer here...)</answer>"
+    "You are simulating a conversation between a User and an Assistant.\n"
+    "The User asks questions, and the Assistant provides solutions.\n\n"
+    "For every response:\n"
+    "1. The Assistant must first work through its reasoning process privately inside the <think> </think> tags.\n"
+    "   - This section should capture the logical steps, analysis, and intermediate thoughts.\n"
+    "   - It should NOT address the User directly.\n"
+    "2. The Assistant must then present the final response inside the <answer> </answer> tags.\n"
+    "   - This section should be clear, concise, and directly answer the User’s query.\n"
+    "   - It should NOT include hidden reasoning or meta-instructions.\n\n"
+    "The format is strictly enforced:\n\n"
+    "<think>(detailed reasoning process goes here)</think>\n"
+    "<answer>(final user-facing answer goes here)</answer>\n\n"
+    "No additional text, explanations, or deviations are allowed outside of these tags."
 )
-
 
 def assert_dataset_has_correct_columns(dataset: Dataset) -> None:
     """Assert if the dataset has the correct columns."""
