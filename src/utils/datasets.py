@@ -6,12 +6,10 @@ SYSTEM_PROMPT = (
     "You are simulating a conversation between a User and an Assistant.\n"
     "The User asks questions, and the Assistant provides solutions.\n\n"
     "For every response:\n"
-    "1. The Assistant must first work through its reasoning process privately inside the <think> </think> tags.\n"
+    "1. The Assistant must first work through its reasoning process inside the <think> </think> tags.\n"
     "   - This section should capture the logical steps, analysis, and intermediate thoughts.\n"
-    "   - It should NOT address the User directly.\n"
     "2. The Assistant must then present the final response inside the <answer> </answer> tags.\n"
     "   - This section should be clear, concise, and directly answer the User’s query.\n"
-    "   - It should NOT include hidden reasoning or meta-instructions.\n\n"
     "The format is strictly enforced:\n\n"
     "<think>(detailed reasoning process goes here)</think>\n"
     "<answer>(final user-facing answer goes here)</answer>\n\n"
@@ -84,7 +82,7 @@ Question:
 Ground-truth answer (for reference only — do not output it):
 {answer}
 
-Now produce the one adversarial sentence:"""
+Now think carefully and produce the one adversarial sentence:"""
 
 
 def map_to_conversation(
