@@ -1,15 +1,12 @@
 import logging
 import os
-
-# Export path
-import sys
+from collections.abc import Callable
 
 from datasets import Dataset
 from peft import LoraConfig, get_peft_model
-from transformers import AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, PreTrainedModel
 from trl import GRPOConfig, GRPOTrainer
 
-sys.path.append("/workspace/squad-adversarial-grpo/")
 from src.utils.datasets import load_csv_dataset
 from src.utils.rewards import bert_reward, format_reward
 
@@ -17,48 +14,58 @@ from src.utils.rewards import bert_reward, format_reward
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("grpo_training")
 
-# Paths and config
-DATASET_CSV = "/workspace/squad-adversarial-grpo/data/squad_golden.csv"
-OUTPUT_DIR = "/workspace/squad-adversarial-grpo/outputs/qwen2.5-7b-grpo"
-MODEL_ID = "Qwen/Qwen2.5-3B-Instruct"
+# Paths and config (override via environment variables if set)
+PROJECT_ROOT = os.environ.get(
+    "PROJECT_ROOT",
+    "/Users/sonphat.tran/grpo_adv_prompter_squad",
+)
+DATASET_CSV = os.environ.get(
+    "DATASET_CSV",
+    os.path.join(PROJECT_ROOT, "data", "squad_golden.csv"),
+)
+OUTPUT_DIR = os.environ.get(
+    "OUTPUT_DIR",
+    os.path.join(PROJECT_ROOT, "outputs", "qwen2.5-3b-grpo"),
+)
+MODEL_ID = os.environ.get("MODEL_ID", "Qwen/Qwen2.5-3B-Instruct")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 logger.info("Output dir: %s", OUTPUT_DIR)
 
 
-def main() -> None:
+def load_train_dataset(dataset_csv: str, max_rows: int = 2000, seed: int = 42) -> Dataset:
+    """Load, shuffle, and subsample the training dataset.
+
+    Args:
+        dataset_csv: Absolute path to the dataset CSV file.
+        max_rows: Maximum number of rows to select for training.
+        seed: Seed for dataset shuffling.
+
+    Returns:
+        A `datasets.Dataset` ready for GRPO training.
     """
-    Main function for GRPO training.
-    """
-    # 1) Load dataset and adapt to conversation format expected by TRL GRPO
-    raw_dataset: Dataset = load_csv_dataset(DATASET_CSV)
-    raw_dataset = raw_dataset.shuffle(seed=42)
-    train_dataset = raw_dataset.select(range(min(2000, len(raw_dataset))))
+    raw_dataset: Dataset = load_csv_dataset(dataset_csv)
+    raw_dataset = raw_dataset.shuffle(seed=seed)
+    train_dataset = raw_dataset.select(range(min(max_rows, len(raw_dataset))))
     logger.info("Train rows: %d", len(train_dataset))
+    return train_dataset
 
-    # Sanity check columns used by rewards
-    required_cols = [
-        "id",
-        "context",
-        "question",
-        "answer",
-        "answer_start_char_idx",
-        "answer_end_char_idx",
-        "prompt",
-    ]
-    missing = [c for c in required_cols if c not in train_dataset.column_names]
-    if missing:
-        raise ValueError(f"Missing columns for rewards: {missing}")
 
-    # 2) Load base model and tokenizer
-    # We apply LoRA for memory efficiency per HF guide
+def create_lora_model(model_id: str) -> PreTrainedModel:
+    """Create a base causal LM and wrap it with LoRA adapters.
+
+    Args:
+        model_id: Hugging Face model identifier to load as the base model.
+
+    Returns:
+        A `transformers.PreTrainedModel` with LoRA adapters applied.
+    """
     model = AutoModelForCausalLM.from_pretrained(
-        MODEL_ID,
+        model_id,
         torch_dtype="auto",
         device_map="auto",
     )
 
-    # Setup LoRA
     lora_cfg = LoraConfig(
         r=8,
         lora_alpha=16,
@@ -69,22 +76,32 @@ def main() -> None:
     )
     model = get_peft_model(model, lora_cfg)
     logger.info("Model with LoRA ready")
+    return model
 
-    # 3) Define GRPO config (adapted from HF guide)
-    training_args = GRPOConfig(
-        output_dir=OUTPUT_DIR,
+
+def create_grpo_config(output_dir: str) -> GRPOConfig:
+    """Create GRPO training configuration.
+
+    Args:
+        output_dir: Directory where checkpoints and logs will be written.
+
+    Returns:
+        A configured `trl.GRPOConfig` instance.
+    """
+    return GRPOConfig(
+        output_dir=output_dir,
         learning_rate=5e-6,
         weight_decay=0.01,
         warmup_ratio=0.1,
         lr_scheduler_type="linear",
         optim="adamw_8bit",
-        remove_unused_columns=False,  # keep extra columns for reward kwargs
+        remove_unused_columns=False,
         gradient_accumulation_steps=16,
         num_train_epochs=1,
         bf16=True,
         per_device_train_batch_size=1,
         # Preprocessing controls
-        max_completion_length=256,  # shorter for quick runs
+        max_completion_length=256,
         num_generations=4,
         max_prompt_length=512,
         # Logging and saving
@@ -94,20 +111,63 @@ def main() -> None:
         save_steps=50,
     )
 
-    # 4) Instantiate GRPOTrainer with both rewards
-    # format_reward expects the assistant completion content to match <think>...</think><answer>...</answer>
-    # bert_reward uses the dataset columns to compute QA-based penalties
-    reward_funcs = [format_reward, bert_reward]
+
+def create_trainer(
+    model: PreTrainedModel,
+    train_dataset: Dataset,
+    args: GRPOConfig,
+) -> GRPOTrainer:
+    """Construct a GRPOTrainer with reward functions.
+
+    Args:
+        model: The LoRA-wrapped pretrained model to train.
+        train_dataset: The dataset to use for training.
+        args: The GRPO configuration.
+
+    Returns:
+        An initialized `trl.GRPOTrainer` instance.
+    """
+    reward_funcs: list[Callable[..., list[float]]] = [format_reward, bert_reward]
     trainer = GRPOTrainer(
         model=model,
         reward_funcs=reward_funcs,
-        args=training_args,
+        args=args,
         train_dataset=train_dataset,
     )
+    return trainer
 
-    # 5) Train and save
+
+def train_and_save(trainer: GRPOTrainer, output_dir: str) -> None:
+    """Run training and save the final model to disk.
+
+    Args:
+        trainer: The configured GRPO trainer instance.
+        output_dir: Output directory to save the trained model.
+
+    Returns:
+        None
+    """
     train_result = trainer.train()
     logger.info("Training complete: %s", str(train_result))
+    trainer.save_model(output_dir)
+    logger.info("Saved to %s", output_dir)
 
-    trainer.save_model(OUTPUT_DIR)
-    logger.info("Saved to %s", OUTPUT_DIR)
+
+def main() -> None:
+    """Run the full GRPO training workflow end-to-end.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    train_dataset = load_train_dataset(DATASET_CSV, max_rows=2000, seed=42)
+    model = create_lora_model(MODEL_ID)
+    training_args = create_grpo_config(OUTPUT_DIR)
+    trainer = create_trainer(model=model, train_dataset=train_dataset, args=training_args)
+    train_and_save(trainer=trainer, output_dir=OUTPUT_DIR)
+
+
+if __name__ == "__main__":
+    main()
