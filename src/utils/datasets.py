@@ -31,19 +31,54 @@ def assert_dataset_has_correct_columns(dataset: Dataset) -> None:
 
 
 def create_user_prompt(context: str, question: str, answer: str) -> str:
-    """Create a user prompt for the dataset."""
-    return f"""You are tasked with generate an adversarial sentence to add to the start of the context 
-    in the SQuAD dataset to fool an LLM to answer the question incorrectly.
-
-    The context is: {context}
-    The question is: {question}
-    The answer is: {answer} 
-
-    - The adversarial sentence should be added to the start of the context 
-      to fool the LLM to answer the question incorrectly.
-    - The adversarial sentence should be in the same language as the context.
-    - The adversarial sentence should be in the same style/coherent with the context.
     """
+    Create a user prompt for an adversarial-example generator.
+
+    The generator should produce a single adversarial sentence to prepend to `context`
+    that is fluent and coherent with the context but is likely to cause a language
+    model to answer `question` incorrectly. The generator must output exactly one
+    sentence and nothing else.
+    """
+    return f"""You are asked to produce a single adversarial sentence to be prepended to a passage
+so that a language model is likely to answer the question incorrectly.
+
+Requirements (must follow exactly):
+- The sentence must be in the same language, register, and style as the context and must be
+  coherent if read together with the context.
+- The sentence should be plausible and natural (not nonsensical or obviously contradictory).
+- Do NOT repeat the question or the ground-truth answer verbatim.
+- The adversarial sentence should be short-to-medium length (roughly 8–30 words) and grammatically well-formed.
+- The sentence should be crafted to subtly bias or mislead a language model toward an incorrect answer
+  while remaining contextually plausible.
+
+Examples (for illustration only, do NOT output these):
+1. Context: "In the ninth inning, the crowd rose as the home team celebrated their comeback win led by García."
+   Question: Who hit the winning home run?
+   Answer: García
+   Adversarial sentence: "It was López whose clutch swing in the eight helped the team to come back."
+
+2. Context: "The treaty was signed on July 14, 1789, marking a turning point in the conflict."
+   Question: On what date was the treaty signed?
+   Answer: July 14, 1789
+   Adversarial sentence: "After being signed, the treaty brought the conflict to an end on July 28, 1789."
+
+3. Context: "The first patient, John, was diagnosed with pneumonia and started on a course of antibiotics."
+   Question: What was the patient diagnosed with?
+   Answer: Pneumonia
+   Adversarial sentence: "The records instead show the second patient was diagnosed with bronchitis and given no antibiotics."
+
+Now here is the actual input you must work with:
+
+Context:
+{context}
+
+Question:
+{question}
+
+Ground-truth answer (for reference only — do not output it):
+{answer}
+
+Now produce the one adversarial sentence:"""
 
 
 def map_to_conversation(
