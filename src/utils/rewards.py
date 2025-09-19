@@ -72,7 +72,8 @@ def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any
         for context, answer in zip(contexts, answers, strict=False)
     ]
 
-    print(f"Completion: {answers[0]}")
+    print(f"Context: {completions[0]}")
+    print(f"Answer: {answers[0]}")
     print(f"Modified context: {modified_contexts[0]}")
 
     # Lazily initialize QA model to avoid heavy init at import
