@@ -14,3 +14,6 @@ data/
 
 # Hydra
 outputs/
+
+# Environment variables
+.env

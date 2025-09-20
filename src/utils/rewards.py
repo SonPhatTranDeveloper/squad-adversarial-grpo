@@ -1,7 +1,8 @@
 import re
 
 from src.utils.bert import BertQuestionAnswering
-from src.utils.string import extract_answer, format_sentence
+from src.utils.openai_model import AnswerabilityEvaluator
+from src.utils.string_utils import extract_answer, format_sentence
 
 # Define the weights for the reduction metrics
 F1_WEIGHT = 1.0
@@ -93,7 +94,7 @@ def multi_think_reward(
     Reward function that promotes multiple <think>...</think> sections.
 
     Each <think> block contributes `THINK_REWARD` to the score, capped at
-    `ANSWER_REWARD` to keep the scale comparable to other rewards.
+    `THINK_REWARD` to keep the scale comparable to other rewards.
 
     Args:
         completions: List of completions of the format:
@@ -144,7 +145,7 @@ def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any
     golden_answers_end_idx = kwargs["answer_end_char_idx"]
 
     # Get the completions
-    completions = [completion[0]["content"] for completion in completions]
+    completions = [completion[-1]["content"] for completion in completions]
 
     # Get the answers
     answers = [extract_answer(completion) for completion in completions]
@@ -180,3 +181,36 @@ def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any
         + SPAN_DIFFERENCE_WEIGHT * metric["span_difference"]
         for metric in metrics
     ]
+
+
+_answerability_evaluator: AnswerabilityEvaluator | None = None
+
+
+def answerability_reward(
+    completions: list[list[dict[str, str]]], **kwargs: dict[str, any]
+) -> list[float]:
+    """
+    Reward function that checks if a completion is answerable.
+
+    Args:
+        completions: List of completions of the format:
+        [
+            [
+                {"role": "user", "content": "..."},
+                {"role": "assistant", "content": "..."},
+            ]
+        ]
+
+    Returns:
+        List of rewards.
+    """
+    questions = kwargs["question"]
+    completions = [completion[-1]["content"] for completion in completions]
+    new_sentences = [extract_answer(completion) for completion in completions]
+
+    # Lazily initialize AnswerabilityEvaluator to avoid heavy init at import
+    global _answerability_evaluator
+    if _answerability_evaluator is None:
+        _answerability_evaluator = AnswerabilityEvaluator()
+
+    return _answerability_evaluator.get_rewards(questions, new_sentences)
