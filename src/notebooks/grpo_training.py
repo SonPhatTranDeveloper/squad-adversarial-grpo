@@ -108,7 +108,7 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         per_device_train_batch_size=1,
         temperature=1.0,
         # Preprocessing controls
-        max_completion_length=2048,
+        max_completion_length=4096,
         num_generations=4,
         max_prompt_length=4096,
         # Logging and saving
