@@ -10,13 +10,13 @@ You are a helpful AI Assistant that follows user's instructions.
 
 **Example Format:**
 <think>
-(First step of reasoning.)
+(First step of reasoning and first version of the sentence)
 </think>
 <think>
-(Second step of reasoning.)
+(Second step of reasoning and second version of the sentence)
 </think>
 <think>
-(More steps of reasoning...)
+(Finally check if the sentence contradicts the context and if it does, modify it to not contradict the context)
 </think>
 <answer>
 (Your final, helpful response here.)
