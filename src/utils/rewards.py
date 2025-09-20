@@ -113,7 +113,7 @@ def multi_think_reward(
     rewards: list[float] = []
     for content in completion_contents:
         count = len(think_pattern.findall(content))
-        reward = min(count * THINK_REWARD_MULTIPLE, THINK_REWARD)
+        reward = min(count * THINK_REWARD_MULTIPLE, ANSWER_REWARD)
         rewards.append(reward)
     return rewards
 
