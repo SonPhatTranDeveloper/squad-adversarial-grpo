@@ -95,7 +95,7 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
     """
     return GRPOConfig(
         output_dir=output_dir,
-        learning_rate=1e-5,
+        learning_rate=5e-6,
         weight_decay=0.01,
         warmup_ratio=0.1,
         lr_scheduler_type="linear",
