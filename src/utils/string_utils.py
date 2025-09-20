@@ -33,6 +33,12 @@ def format_sentence(sentence: str) -> str:
     if sentence_stripped == "":
         return ""
 
+    if sentence_stripped.startswith("\""):
+        sentence_stripped = sentence_stripped[1:]
+
+    if sentence_stripped.endswith("\""):
+        sentence_stripped = sentence_stripped[:-1]
+
     last_char = sentence_stripped[-1]
     if last_char in ".!?":
         return sentence_stripped + " "
