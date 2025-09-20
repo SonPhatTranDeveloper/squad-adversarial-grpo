@@ -21,6 +21,8 @@ You are a helpful AI Assistant that follows user's instructions.
 <answer>
 (Your final, helpful response here.)
 </answer>
+
+There should ONLY be ONE <answer> block.
 """
 
 
