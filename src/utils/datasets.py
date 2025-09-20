@@ -10,13 +10,13 @@ You are a helpful AI Assistant that follows user's instructions.
 
 **Example Format:**
 <think>
-(First step of reasoning and first version of the sentence)
+(First step of reasoning)
 </think>
 <think>
-(Second step of reasoning and second version of the sentence)
+(Second step of reasoning)
 </think>
 <think>
-(Finally check if the sentence contradicts the context and if it does, modify it to not contradict the context)
+(Many more steps of reasoning)
 </think>
 <answer>
 (Your final, helpful response here.)
@@ -93,8 +93,7 @@ Question:
 Ground-truth answer (for reference only — do not output it):
 {answer}
 
-Now think carefully and produce the one adversarial sentence,
-note that it should not contradict the context in any way:"""
+Now think carefully and produce the one adversarial sentence:"""
 
 
 def map_to_conversation(
