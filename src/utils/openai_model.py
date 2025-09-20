@@ -116,7 +116,7 @@ S: {sentence}
             content = response.choices[0].message.content or "{}"
             parsed = json.loads(content)
             answer = str(parsed.get("answer", "no")).strip().lower()
-            return -1.0 if answer == "yes" else 1.0
+            return -0.5 if answer == "yes" else 0.5
 
         max_workers = min(8, len(questions))
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -124,11 +124,3 @@ S: {sentence}
 
         return rewards
 
-
-if __name__ == "__main__":
-    load_dotenv()
-    evaluator = AnswerabilityEvaluator()
-    questions = ["What is the capital of France?", "What is the capital of Germany?"]
-    new_sentences = ["Paris is the capital of France.", "Germany has beautiful cities."]
-    rewards = evaluator.get_rewards(questions, new_sentences)
-    print(rewards)
