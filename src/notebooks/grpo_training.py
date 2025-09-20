@@ -105,7 +105,7 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         gradient_accumulation_steps=4,
         num_train_epochs=1,
         bf16=True,
-        per_device_train_batch_size=1,
+        per_device_train_batch_size=4,
         temperature=1.0,
         # Preprocessing controls
         max_completion_length=4096,
@@ -176,7 +176,7 @@ def main() -> None:
     Returns:
         None
     """
-    train_dataset = load_train_dataset(DATASET_CSV, max_rows=4000, seed=42)
+    train_dataset = load_train_dataset(DATASET_CSV, max_rows=2000, seed=42)
     model = create_lora_model(MODEL_ID)
     training_args = create_grpo_config(OUTPUT_DIR)
     trainer = create_trainer(model=model, train_dataset=train_dataset, args=training_args)
