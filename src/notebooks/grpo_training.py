@@ -99,7 +99,7 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         learning_rate=1e-5,
         weight_decay=0.01,
         warmup_ratio=0.1,
-        lr_scheduler_type="cosine_with_warmup",
+        lr_scheduler_type="cosine",
         optim="adamw_8bit",
         remove_unused_columns=False,
         gradient_accumulation_steps=16,
