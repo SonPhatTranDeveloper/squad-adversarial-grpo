@@ -177,8 +177,8 @@ def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any
 
     return [
         F1_WEIGHT * (100.0 - metric["f1"]) / 100.0
-        + EXACT_MATCH_WEIGHT * (100.0 - metric["exact_match"]) / 100.0
-        + SPAN_DIFFERENCE_WEIGHT * metric["span_difference"]
+        # + EXACT_MATCH_WEIGHT * (100.0 - metric["exact_match"]) / 100.0
+        # + SPAN_DIFFERENCE_WEIGHT * metric["span_difference"]
         for metric in metrics
     ]
 
