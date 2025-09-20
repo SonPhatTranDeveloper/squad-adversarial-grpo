@@ -14,6 +14,7 @@ from src.utils.rewards import (
     format_reward,
     multi_think_reward,
     think_reward,
+    answerability_reward,
 )
 
 # Set up logging
@@ -139,6 +140,7 @@ def create_trainer(
         answer_reward,
         bert_reward,
         multi_think_reward,
+        answerability_reward,
     ]
     trainer = GRPOTrainer(
         model=model,
