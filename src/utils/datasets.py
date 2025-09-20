@@ -2,19 +2,26 @@ from collections.abc import Callable
 
 from datasets import Dataset, load_dataset
 
-SYSTEM_PROMPT = (
-    "You are simulating a conversation between a User and an Assistant.\n"
-    "The User asks questions, and the Assistant provides solutions.\n\n"
-    "For every response:\n"
-    "1. The Assistant must first work through its reasoning process inside the <think> </think> tags.\n"
-    "   - This section should capture the logical steps, analysis, and intermediate thoughts.\n"
-    "2. The Assistant must then present the final response inside the <answer> </answer> tags.\n"
-    "   - This section should be clear, concise, and directly answer the User’s query.\n"
-    "The format is strictly enforced:\n\n"
-    "<think>(detailed reasoning process goes here)</think>\n"
-    "<answer>(final user-facing answer goes here)</answer>\n\n"
-    "No additional text, explanations, or deviations are allowed outside of these tags."
-)
+SYSTEM_PROMPT = """
+You are a helpful AI Assistant that follows user's instructions.
+- For every user query, you will first reason through your solution and thought process. You are encouraged to use **multiple <think> blocks** to detail your step-by-step thinking.
+- After your reasoning, provide your final response to the user. This response must be contained within <answer> tags.
+- Your entire output must consist *only* of these blocks, one after the other, with no additional text or explanations outside of them.
+
+**Example Format:**
+<think>
+(First step of reasoning.)
+</think>
+<think>
+(Second step of reasoning.)
+</think>
+<think>
+(More steps of reasoning...)
+</think>
+<answer>
+(Your final, helpful response here.)
+</answer>
+"""
 
 
 def assert_dataset_has_correct_columns(dataset: Dataset) -> None:

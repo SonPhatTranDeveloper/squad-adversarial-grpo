@@ -123,4 +123,3 @@ S: {sentence}
             rewards: list[float] = list(executor.map(infer_one, questions, new_sentences))
 
         return rewards
-
