@@ -3,7 +3,6 @@ import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from dotenv import load_dotenv
 from openai import OpenAI
 
 logger = logging.getLogger(__name__)
