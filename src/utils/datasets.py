@@ -64,7 +64,7 @@ Requirements (must follow exactly):
 - The adversarial sentence should be short-to-medium length (roughly 8–30 words) and grammatically well-formed.
 - The adversarial sentence should be crafted to be placed in front of the context.
 - The sentence should be crafted to subtly bias or mislead a language model toward an incorrect answer
-  but it is very important that it DOES NOT contradict the context in any way.
+- The sentence should not contradict the context in any way.
 
 Examples (for illustration only, do NOT output these):
 1. Context: "In the ninth inning, the crowd rose as the home team celebrated their comeback win led by García."
@@ -93,7 +93,8 @@ Question:
 Ground-truth answer (for reference only — do not output it):
 {answer}
 
-Now think carefully and produce the one adversarial sentence:"""
+Now think carefully and produce the one adversarial sentence,
+note that it should not contradict the context in any way:"""
 
 
 def map_to_conversation(
