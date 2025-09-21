@@ -8,6 +8,29 @@ from transformers import (
 logger = logging.getLogger(__name__)
 
 
+def _format_box(lines: list[str]) -> str:
+    """Render a simple ASCII box around the provided lines.
+
+    Args:
+        lines: Content lines to render inside the box. Lines will be padded
+            to the width of the longest line.
+
+    Returns:
+        A single string containing the boxed content with newlines.
+    """
+    if not lines:
+        return ""
+    max_width = max(len(line) for line in lines)
+    top_border = "+" + "-" * (max_width + 2) + "+"
+    bottom_border = top_border
+    boxed_lines = [top_border]
+    for line in lines:
+        padded = line.ljust(max_width)
+        boxed_lines.append(f"| {padded} |")
+    boxed_lines.append(bottom_border)
+    return "\n".join(boxed_lines)
+
+
 class BertQuestionAnswering:
     def __init__(
         self,
@@ -134,7 +157,20 @@ class BertQuestionAnswering:
             modified_end = int(mod.get("end", -1))
             gold_start = int(golden_answers_start_idx[idx])
             gold_end = int(golden_answers_end_idx[idx])
-            print(f"Modified start: {modified_start}, gold start: {gold_start}, modified end: {modified_end}, gold end: {gold_end}")
+            answers_match = modified_answer == golden_answers[idx]
+            box = _format_box(
+                [
+                    "Modified answer details",
+                    f"Modified answer: {modified_answer}",
+                    f"Golden answer:   {golden_answers[idx]}",
+                    f"Answer match (==): {'YES ✅' if answers_match else 'NO ❌'}",
+                    f"Modified start:  {modified_start}",
+                    f"Modified end:    {modified_end}",
+                    f"Gold start:      {gold_start}",
+                    f"Gold end:        {gold_end}",
+                ]
+            )
+            logger.info("\n%s", box)
 
             original_context_length = len(contexts[idx])
             modified_context_length = len(modified_contexts[idx])
