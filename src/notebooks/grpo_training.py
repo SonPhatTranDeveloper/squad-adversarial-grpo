@@ -104,8 +104,8 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         gradient_accumulation_steps=4,
         num_train_epochs=1,
         bf16=True,
-        per_device_train_batch_size=2,
-        temperature=0.7,
+        per_device_train_batch_size=1,
+        temperature=1.0,
         # Preprocessing controls
         max_completion_length=4096,
         num_generations=4,
