@@ -5,9 +5,9 @@ from src.utils.openai_model import AnswerabilityEvaluator
 from src.utils.string_utils import extract_answer, format_sentence
 
 # Define the weights for the reduction metrics
-F1_WEIGHT = 4.0
+F1_WEIGHT = 1.0
 EXACT_MATCH_WEIGHT = 1.0
-SPAN_DIFFERENCE_WEIGHT = 4.0
+SPAN_DIFFERENCE_WEIGHT = 1.0
 
 # Rewards for format adherence
 THINK_REWARD = 0.5
