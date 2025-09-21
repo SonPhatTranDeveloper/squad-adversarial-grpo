@@ -189,7 +189,8 @@ class BertQuestionAnswering:
                 {
                     "f1": float(modified_metrics["f1"]),
                     "exact_match": float(modified_metrics["exact_match"]),
-                    "span_difference": float(int(span_difference)) / modified_context_length,
+                    # Only calculate span difference if the answers do not match
+                    "span_difference": float(int(span_difference)) / modified_context_length if modified_answer != golden_answers[idx] else 0.0,
                 }
             )
 
