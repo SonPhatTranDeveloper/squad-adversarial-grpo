@@ -158,6 +158,11 @@ class BertQuestionAnswering:
             gold_start = int(golden_answers_start_idx[idx])
             gold_end = int(golden_answers_end_idx[idx])
             answers_match = modified_answer == golden_answers[idx]
+
+            original_context_length = len(contexts[idx])
+            modified_context_length = len(modified_contexts[idx])
+            context_length_difference = abs(original_context_length - modified_context_length)
+
             box = _format_box(
                 [
                     "Modified answer details",
@@ -166,8 +171,8 @@ class BertQuestionAnswering:
                     f"Answer match (==): {'YES ✅' if answers_match else 'NO ❌'}",
                     f"Modified start:  {modified_start}",
                     f"Modified end:    {modified_end}",
-                    f"Gold start:      {gold_start}",
-                    f"Gold end:        {gold_end}",
+                    f"Gold start:      {gold_start + context_length_difference}",
+                    f"Gold end:        {gold_end + context_length_difference}",
                 ]
             )
             logger.info("\n%s", box)
