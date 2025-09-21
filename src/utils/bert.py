@@ -134,6 +134,7 @@ class BertQuestionAnswering:
             modified_end = int(mod.get("end", -1))
             gold_start = int(golden_answers_start_idx[idx])
             gold_end = int(golden_answers_end_idx[idx])
+            print(f"Modified start: {modified_start}, gold start: {gold_start}, modified end: {modified_end}, gold end: {gold_end}")
 
             original_context_length = len(contexts[idx])
             modified_context_length = len(modified_contexts[idx])
