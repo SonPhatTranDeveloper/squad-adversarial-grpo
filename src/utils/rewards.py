@@ -7,7 +7,7 @@ from src.utils.string_utils import extract_answer, format_sentence
 # Define the weights for the reduction metrics
 F1_WEIGHT = 4.0
 EXACT_MATCH_WEIGHT = 1.0
-SPAN_DIFFERENCE_WEIGHT = 0.5
+SPAN_DIFFERENCE_WEIGHT = 4.0
 
 # Rewards for format adherence
 THINK_REWARD = 0.5
@@ -194,9 +194,9 @@ def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any
             return -5.0
 
     return [
-        plan_reward(metric["f1"])
+        F1_WEIGHT * (100.0 - metric["f1"]) / 100.0
         # + EXACT_MATCH_WEIGHT * (100.0 - metric["exact_match"]) / 100.0
-        # + SPAN_DIFFERENCE_WEIGHT * metric["span_difference"]
+        + SPAN_DIFFERENCE_WEIGHT * metric["span_difference"]
         for metric in metrics
     ]
 
