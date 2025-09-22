@@ -174,25 +174,7 @@ def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any
         golden_answers_start_idx=golden_answers_start_idx,
         golden_answers_end_idx=golden_answers_end_idx,
     )
-
-    def plan_reward(metric: float) -> float:
-        if metric <= 30:
-            return 5.0
-        elif metric <= 40:
-            return 3.5
-        elif metric <= 50:
-            return 2.5
-        elif metric <= 60:
-            return 1.5
-        elif metric <= 70:
-            return 0.5
-        elif metric <= 80:
-            return -1.5
-        elif metric <= 90:
-            return -3.5
-        else:
-            return -5.0
-
+    
     return [
         F1_WEIGHT * (100.0 - metric["f1"]) / 100.0
         + EXACT_MATCH_WEIGHT * (100.0 - metric["exact_match"]) / 100.0
