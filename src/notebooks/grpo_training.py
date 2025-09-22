@@ -104,11 +104,11 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         gradient_accumulation_steps=1,
         num_train_epochs=1,
         bf16=True,
-        per_device_train_batch_size=1,
+        per_device_train_batch_size=4,
         temperature=1.0,
         # Preprocessing controls
         max_completion_length=2048,
-        num_generations=2,
+        num_generations=4,
         max_prompt_length=4096,
         # Logging and saving
         report_to=["tensorboard"],
