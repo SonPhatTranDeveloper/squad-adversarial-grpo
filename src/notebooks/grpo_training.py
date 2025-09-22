@@ -101,14 +101,14 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         lr_scheduler_type="linear",
         optim="adamw_8bit",
         remove_unused_columns=False,
-        gradient_accumulation_steps=1,
+        gradient_accumulation_steps=16,
         num_train_epochs=1,
         bf16=True,
-        per_device_train_batch_size=4,
+        per_device_train_batch_size=1,
         temperature=1.0,
         # Preprocessing controls
-        max_completion_length=2048,
-        num_generations=4,
+        max_completion_length=512,
+        num_generations=8,
         max_prompt_length=4096,
         # Logging and saving
         report_to=["tensorboard"],
