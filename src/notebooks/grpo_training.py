@@ -108,7 +108,7 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         temperature=1.0,
         # Preprocessing controls
         max_completion_length=2048,
-        num_generations=1,
+        num_generations=2,
         max_prompt_length=4096,
         # Logging and saving
         report_to=["tensorboard"],
