@@ -72,8 +72,8 @@ def create_lora_model(model_id: str) -> PreTrainedModel:
     )
 
     lora_cfg = LoraConfig(
-        r=8,
-        lora_alpha=16,
+        r=16,
+        lora_alpha=32,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
         lora_dropout=0.05,
         bias="none",
@@ -108,7 +108,7 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         temperature=1.0,
         # Preprocessing controls
         max_completion_length=512,
-        num_generations=8,
+        num_generations=16,
         max_prompt_length=4096,
         # Logging and saving
         report_to=["tensorboard"],
@@ -135,11 +135,7 @@ def create_trainer(
     """
     reward_funcs: list[Callable[..., list[float]]] = [
         format_reward,
-        think_reward,
-        answer_reward,
         bert_reward,
-        multi_think_reward,
-        # answerability_reward,
     ]
     trainer = GRPOTrainer(
         model=model,
