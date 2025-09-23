@@ -9,6 +9,7 @@ from trl import GRPOConfig, GRPOTrainer
 
 from src.utils.datasets import load_csv_dataset
 from src.utils.rewards import (
+    answer_length_reward,
     bert_reward,
     format_reward,
 )
@@ -133,6 +134,7 @@ def create_trainer(
     reward_funcs: list[Callable[..., list[float]]] = [
         format_reward,
         bert_reward,
+        contain_explanation_reward,
     ]
     trainer = GRPOTrainer(
         model=model,

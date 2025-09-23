@@ -216,7 +216,9 @@ def answerability_reward(
     return _answerability_evaluator.get_rewards(questions, new_sentences)
 
 
-def contain_explanation_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any]) -> list[float]:
+def contain_explanation_reward(
+    completions: list[list[dict[str, str]]], **kwargs: dict[str, any]
+) -> list[float]:
     """
     Reward function that checks if a completion contains an explanation.
 
@@ -234,5 +236,46 @@ def contain_explanation_reward(completions: list[list[dict[str, str]]], **kwargs
     """
     completions = [completion[-1]["content"] for completion in completions]
 
-    # Check for some vocabulary like "model", "context", "answer", 
+    # Check for some vocabulary like "model", "context", "answer",
     return [-2.0 if "model" in completion else 0.0 for completion in completions]
+
+
+def answer_length_reward(
+    completions: list[list[dict[str, str]]], **kwargs: dict[str, any]
+) -> list[float]:
+    """
+    Reward that encourages short answers inside <answer>...</answer>.
+
+    The reward is computed on the extracted answer text (without tags).
+    By default, we softly penalize lengths above a target using a hinge:
+
+        reward = -max(0, (len - target) / target) * scale
+
+    Where length is measured in words. This yields 0 for answers at or
+    below target length, and increasingly negative values above.
+
+    Args:
+        completions: A list of conversations with the last message being the
+            assistant completion. Shape:
+            [[{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}], ...]
+        **kwargs: Optional parameters:
+            - target_words: int, desired maximum word count (default: 12)
+            - scale: float, penalty multiplier (default: 1.0)
+
+    Returns:
+        List of float rewards aligned with completions.
+    """
+    target_words: int = 20
+    scale: float = 1.0
+
+    answers = [extract_answer(conv[-1]["content"]) for conv in completions]
+
+    rewards: list[float] = []
+    for answer in answers:
+        # Count words by simple whitespace split; robust and fast
+        word_count = len(answer.split())
+        excess = max(0, word_count - target_words)
+        # Linear penalty scaled by how much it exceeds the target
+        penalty = (excess / max(1, target_words)) * scale
+        rewards.append(-penalty)
+    return rewards
