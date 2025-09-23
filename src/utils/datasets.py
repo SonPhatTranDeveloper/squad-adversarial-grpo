@@ -62,9 +62,8 @@ Requirements (must follow exactly):
 - The sentence must be in the same language, register, and style as the context and must be
   coherent if read together with the context.
 - The adversarial sentence should be short-to-medium length (roughly 8–30 words) and grammatically well-formed.
-- The adversarial sentence should be crafted to be placed in front of the context.
-- The sentence should be crafted to subtly bias or mislead a language model toward an incorrect answer
 - The sentence should not contradict the context in any way.
+- Do not include explanation or comments in the <answer>, just give the answer sentence.
 
 Examples (for illustration only, do NOT output these):
 1. Context: "In the ninth inning, the crowd rose as the home team celebrated their comeback win led by García."
