@@ -214,3 +214,25 @@ def answerability_reward(
         _answerability_evaluator = AnswerabilityEvaluator()
 
     return _answerability_evaluator.get_rewards(questions, new_sentences)
+
+
+def contain_explanation_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any]) -> list[float]:
+    """
+    Reward function that checks if a completion contains an explanation.
+
+    Args:
+        completions: List of completions of the format:
+        [
+            [
+                {"role": "user", "content": "..."},
+                {"role": "assistant", "content": "..."},
+            ]
+        ]
+
+    Returns:
+        List of rewards.
+    """
+    completions = [completion[-1]["content"] for completion in completions]
+
+    # Check for some vocabulary like "model", "context", "answer", 
+    return [-2.0 if "model" in completion else 0.0 for completion in completions]
