@@ -235,11 +235,12 @@ def contain_explanation_reward(
         List of rewards.
     """
     completions = [completion[-1]["content"] for completion in completions]
+    answers = [extract_answer(completion) for completion in completions]
 
     # Check for some vocabulary like "model", "context", "answer",
     return [
-        -2.0 if "model" in completion or "context" in completion or "answer" in completion else 0.0
-        for completion in completions
+        -2.0 if "model" in answer or "context" in answer or "answer" in answer else 0.0
+        for answer in answers
     ]
 
 
