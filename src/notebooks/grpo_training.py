@@ -135,6 +135,7 @@ def create_trainer(
         format_reward,
         bert_reward,
         contain_explanation_reward,
+        answer_length_reward,
     ]
     trainer = GRPOTrainer(
         model=model,
