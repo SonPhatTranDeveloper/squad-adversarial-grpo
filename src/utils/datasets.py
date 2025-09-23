@@ -59,11 +59,11 @@ def create_user_prompt(context: str, question: str, answer: str) -> str:
 so that a language model is likely to answer the question incorrectly.
 
 Requirements (must follow exactly):
-- The sentence must be in the same language, register, and style as the context and must be
+- The adversarial sentence must be in the same language, register, and style as the context and must be
   coherent if read together with the context.
 - The adversarial sentence should be short-to-medium length (roughly 8–30 words) and grammatically well-formed.
-- The sentence should not contradict the context in any way.
-- Do not include explanation or comments in the <answer>, just give the answer sentence.
+- The adversarial sentence should not contradict the context in any way.
+- Do not include explanation or comments in the <answer>, ONLY give the answer sentence inside the <answer> tags.
 
 Examples (for illustration only, do NOT output these):
 1. Context: "In the ninth inning, the crowd rose as the home team celebrated their comeback win led by García."
@@ -92,7 +92,8 @@ Question:
 Ground-truth answer (for reference only — do not output it):
 {answer}
 
-Now think carefully and produce the one adversarial sentence:"""
+Now think carefully and produce the one adversarial sentence.
+Do not include explanation or comments in the <answer>, ONLY give the adversarial sentence inside the <answer> tags:"""
 
 
 def map_to_conversation(
