@@ -174,7 +174,7 @@ def bert_reward(completions: list[list[dict[str, str]]], **kwargs: dict[str, any
         golden_answers_start_idx=golden_answers_start_idx,
         golden_answers_end_idx=golden_answers_end_idx,
     )
-    
+
     return [
         F1_WEIGHT * (100.0 - metric["f1"]) / 100.0
         + EXACT_MATCH_WEIGHT * (100.0 - metric["exact_match"]) / 100.0
