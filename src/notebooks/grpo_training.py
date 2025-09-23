@@ -9,8 +9,8 @@ from trl import GRPOConfig, GRPOTrainer
 
 from src.utils.datasets import load_csv_dataset
 from src.utils.rewards import (
-    answer_length_reward,
     bert_reward,
+    contain_explanation_reward,
     format_reward,
 )
 

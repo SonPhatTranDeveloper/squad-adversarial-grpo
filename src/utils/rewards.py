@@ -237,7 +237,10 @@ def contain_explanation_reward(
     completions = [completion[-1]["content"] for completion in completions]
 
     # Check for some vocabulary like "model", "context", "answer",
-    return [-2.0 if "model" in completion else 0.0 for completion in completions]
+    return [
+        -2.0 if "model" in completion or "context" in completion or "answer" in completion else 0.0
+        for completion in completions
+    ]
 
 
 def answer_length_reward(
