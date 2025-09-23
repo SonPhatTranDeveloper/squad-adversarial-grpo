@@ -268,7 +268,7 @@ def answer_length_reward(
     Returns:
         List of float rewards aligned with completions.
     """
-    target_words: int = 30
+    target_words: int = 40
     scale: float = 1.0
 
     answers = [extract_answer(conv[-1]["content"]) for conv in completions]
