@@ -71,10 +71,10 @@ def create_lora_model(model_id: str) -> PreTrainedModel:
     )
 
     lora_cfg = LoraConfig(
-        r=16,
-        lora_alpha=32,
+        r=64,
+        lora_alpha=128,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
-        lora_dropout=0.05,
+        lora_dropout=0.1,
         bias="none",
         task_type="CAUSAL_LM",
     )
@@ -106,7 +106,7 @@ def create_grpo_config(output_dir: str) -> GRPOConfig:
         per_device_train_batch_size=1,
         temperature=1.0,
         # Preprocessing controls
-        max_completion_length=512,
+        max_completion_length=1024,
         num_generations=16,
         max_prompt_length=4096,
         # Logging and saving
