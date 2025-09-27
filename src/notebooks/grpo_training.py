@@ -32,6 +32,10 @@ OUTPUT_DIR = os.environ.get(
     "OUTPUT_DIR",
     os.path.join(PROJECT_ROOT, "outputs", "qwen2.5-3b-grpo"),
 )
+RESUME_FROM_CHECKPOINT = os.environ.get(
+    "RESUME_FROM_CHECKPOINT",
+    os.path.join(PROJECT_ROOT, "outputs", "qwen2.5-3b-grpo", "checkpoint-50"),
+)
 MODEL_ID = os.environ.get("MODEL_ID", "Qwen/Qwen2.5-3B-Instruct")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
