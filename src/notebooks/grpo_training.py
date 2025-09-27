@@ -157,7 +157,7 @@ def train_and_save(trainer: GRPOTrainer, output_dir: str) -> None:
     Returns:
         None
     """
-    train_result = trainer.train()
+    train_result = trainer.train(resume_from_checkpoint=output_dir)
     logger.info("Training complete: %s", str(train_result))
     trainer.save_model(output_dir)
     logger.info("Saved to %s", output_dir)
