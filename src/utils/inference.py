@@ -184,3 +184,110 @@ class GRPOInference:
             "text": full_text,
             "answer": answer_text,
         }
+
+    def generate_many(
+        self,
+        contexts: list[str],
+        questions: list[str],
+        batch_size: int = 8,
+        max_new_tokens: int | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        do_sample: bool | None = None,
+        show_progress: bool = False,
+    ) -> list[dict[str, Any]]:
+        """Batch-generate completions for multiple (context, question) pairs.
+
+        Args:
+            contexts: List of contexts, length N.
+            questions: List of questions, length N.
+            batch_size: Number of items to process per forward pass.
+            max_new_tokens: Optional override for generation tokens.
+            temperature: Optional override for temperature.
+            top_p: Optional override for top-p sampling.
+            do_sample: Optional override for do_sample.
+            show_progress: If True, display a progress bar over batches.
+
+        Returns:
+            A list of dicts of length N with keys {"prompt", "text", "answer"}.
+        """
+        if len(contexts) != len(questions):
+            raise ValueError("contexts and questions must have the same length")
+
+        total_items = len(contexts)
+        if total_items == 0:
+            return []
+
+        # Prepare generation parameters
+        gen_kwargs: dict[str, Any] = {
+            "max_new_tokens": max_new_tokens if max_new_tokens is not None else self.max_new_tokens,
+            "temperature": temperature if temperature is not None else self.temperature,
+            "top_p": top_p if top_p is not None else self.top_p,
+            "do_sample": self.do_sample if do_sample is None else do_sample,
+            "pad_token_id": self.tokenizer.pad_token_id,
+            "eos_token_id": self.tokenizer.eos_token_id,
+        }
+
+        results: list[dict[str, Any]] = []
+
+        # Optional progress bar without adding a hard dependency
+        range_iter = range(0, total_items, batch_size)
+        if show_progress:
+            try:
+                from tqdm import tqdm  # type: ignore
+
+                range_iter = tqdm(
+                    range_iter,
+                    total=(total_items + batch_size - 1) // batch_size,
+                    desc="Generating",
+                )
+            except Exception:
+                pass
+
+        for start in range_iter:
+            end = min(start + batch_size, total_items)
+            batch_contexts = contexts[start:end]
+            batch_questions = questions[start:end]
+
+            # Build prompts/messages and convert to text using chat template
+            batch_messages = [
+                self._build_messages(context=c, question=q)
+                for c, q in zip(batch_contexts, batch_questions, strict=False)
+            ]
+            batch_prompts = [self._messages_to_text(msgs) for msgs in batch_messages]
+
+            # Tokenize with padding for batch processing
+            inputs = self.tokenizer(
+                batch_prompts,
+                return_tensors="pt",
+                padding=True,
+            )
+            inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+
+            with torch.no_grad():
+                output_ids = self.model.generate(**inputs, **gen_kwargs)
+
+            attention_mask = inputs.get("attention_mask")
+
+            # Compute decoded outputs per-example, slicing off the prompt length
+            if attention_mask is not None:
+                input_lengths = attention_mask.sum(dim=1).tolist()
+            else:
+                # Fallback: assume no padding
+                input_lengths = [inputs["input_ids"].shape[1]] * (end - start)
+
+            for i in range(end - start):
+                prompt_text = batch_prompts[i]
+                input_len_i = int(input_lengths[i])
+                generated_ids_i = output_ids[i][input_len_i:]
+                full_text = self.tokenizer.decode(generated_ids_i, skip_special_tokens=True)
+                answer_text = extract_answer(full_text)
+                results.append(
+                    {
+                        "prompt": prompt_text,
+                        "text": full_text,
+                        "answer": answer_text,
+                    }
+                )
+
+        return results
