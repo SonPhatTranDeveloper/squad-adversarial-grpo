@@ -71,7 +71,7 @@ class GRPOInference:
         self.model = AutoModelForCausalLM.from_pretrained(
             model_id,
             device_map=device_map,
-            torch_dtype=dtype,
+            dtype=dtype,
         )
 
         if adapter_path and os.path.isdir(adapter_path):
