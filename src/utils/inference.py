@@ -177,7 +177,6 @@ class GRPOInference:
 
         # Extract only the assistant completion portion when chat template is used
         # If unavailable, fall back to extracting the <answer> block from the tail
-        print(full_text)
         answer_text = extract_answer(full_text)
 
         return {
