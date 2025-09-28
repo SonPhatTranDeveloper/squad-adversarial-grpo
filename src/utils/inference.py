@@ -63,6 +63,7 @@ class GRPOInference:
         logger.info("Loading tokenizer: %s", model_id)
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_id,
+            padding_side="left",
             use_fast=True,
         )
 
