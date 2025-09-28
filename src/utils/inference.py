@@ -172,7 +172,7 @@ class GRPOInference:
 
         # We generated continuation for the full prompt; the first item is the sequence
         full_text = self.tokenizer.decode(
-            outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True
+            output_ids[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True
         )
 
         # Extract only the assistant completion portion when chat template is used
