@@ -32,7 +32,7 @@ class GRPOInference:
 
     def __init__(
         self,
-        base_model_id: str,
+        model_id: str,
         adapter_path: str | None = None,
         device_map: str | dict[str, int] | None = "auto",
         dtype: any = torch.bfloat16,
@@ -44,32 +44,31 @@ class GRPOInference:
         """Initialize model and tokenizer.
 
         Args:
-            base_model_id: Hugging Face model id/path of the base causal LM.
+            model_id: Hugging Face model id/path of the base causal LM.
             adapter_path: Optional path to LoRA adapter weights saved during training.
             device_map: Passed to `from_pretrained` for device placement.
             dtype: Optional dtype; if None, auto-selects bfloat16/float16 when available.
-            trust_remote_code: Whether to allow custom model/tokenizer code.
             max_new_tokens: Default generation max tokens.
             temperature: Default sampling temperature.
             top_p: Default top-p nucleus sampling.
             do_sample: Whether to sample during generation by default.
         """
-        self.base_model_id = base_model_id
+        self.model_id = model_id
         self.adapter_path = adapter_path
         self.max_new_tokens = max_new_tokens
         self.temperature = temperature
         self.top_p = top_p
         self.do_sample = do_sample
 
-        logger.info("Loading tokenizer: %s", base_model_id)
+        logger.info("Loading tokenizer: %s", model_id)
         self.tokenizer = AutoTokenizer.from_pretrained(
-            base_model_id,
+            model_id,
             use_fast=True,
         )
 
-        logger.info("Loading base model: %s", base_model_id)
+        logger.info("Loading base model: %s", model_id)
         self.model = AutoModelForCausalLM.from_pretrained(
-            base_model_id,
+            model_id,
             device_map=device_map,
             torch_dtype=dtype,
         )
