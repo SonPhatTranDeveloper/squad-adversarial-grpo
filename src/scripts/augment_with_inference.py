@@ -117,7 +117,7 @@ def prepend_answer_to_question(
         new_question = f"{adv_sentence}{question}" if adv_sentence else question
         return index, new_question
 
-    with ThreadPoolExecutor(max_workers=max(1, num_workers)) as executor:
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = []
         for idx, row in df.iterrows():
             futures.append(executor.submit(process_row, idx, row["context"], row["question"]))
