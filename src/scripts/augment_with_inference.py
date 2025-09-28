@@ -4,6 +4,7 @@ import os
 
 import pandas as pd
 import torch
+from tqdm import tqdm
 
 from src.utils.inference import GRPOInference
 from src.utils.string_utils import format_sentence
@@ -92,7 +93,7 @@ def prepend_answer_to_question(df: pd.DataFrame, infer: GRPOInference) -> pd.Dat
         A dataframe with the augmented questions.
     """
     augmented_questions: list[str] = []
-    for _, row in df.iterrows():
+    for _, row in tqdm(df.iterrows(), total=len(df), desc="Augmenting"):
         context: str = row["context"]
         question: str = row["question"]
 
