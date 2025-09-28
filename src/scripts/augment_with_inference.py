@@ -50,7 +50,7 @@ def parse_args() -> argparse.Namespace:
         default="cuda",
         help="Device map for model loading (e.g., 'auto', 'cuda')",
     )
-    parser.add_argument("--max_new_tokens", type=int, default=512)
+    parser.add_argument("--max_new_tokens", type=int, default=1024)
     parser.add_argument("--temperature", type=float, default=1.0)
     parser.add_argument("--top_p", type=float, default=0.9)
     parser.add_argument("--do_sample", action="store_true", help="Enable sampling")
