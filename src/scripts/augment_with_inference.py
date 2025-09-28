@@ -114,7 +114,7 @@ def prepend_answer_to_question(
     new_questions = [f"{a}{q}" if a else q for a, q in zip(adv_sentences, questions, strict=False)]
 
     # Log first adversarial sentence
-    logger.info("First adversarial sentence: %s", adv_sentences[0])
+    print("First adversarial sentence: %s", adv_sentences[0])
 
     df_out = df.copy()
     df_out["question"] = new_questions
