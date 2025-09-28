@@ -279,7 +279,6 @@ class GRPOInference:
                 generated_ids_i = output_ids[i][input_len_i:]
                 full_text = self.tokenizer.decode(generated_ids_i, skip_special_tokens=True)
                 answer_text = extract_answer(full_text)
-                logger.info("Adversarial sentence: %s", answer_text)
                 results.append(
                     {
                         "prompt": prompt_text,
