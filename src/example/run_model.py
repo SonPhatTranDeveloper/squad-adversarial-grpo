@@ -6,7 +6,7 @@ from src.utils.inference import GRPOInference
 def main() -> int:
     # Define model and adapter
     model_id = "Qwen/Qwen2.5-3B-Instruct"
-    adapter_path = "models/qwen2.5-3b-grpo"
+    adapter_path = "outputs/qwen2.5-3b-grpo/checkpoint-2000"
     device_map = "cuda"
     dtype = torch.bfloat16
     max_new_tokens = 128
