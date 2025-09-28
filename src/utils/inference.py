@@ -14,6 +14,7 @@ from typing import Any
 
 import torch
 from peft import PeftModel
+from tqdm import tqdm
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -234,16 +235,11 @@ class GRPOInference:
         # Optional progress bar without adding a hard dependency
         range_iter = range(0, total_items, batch_size)
         if show_progress:
-            try:
-                from tqdm import tqdm  # type: ignore
-
-                range_iter = tqdm(
-                    range_iter,
-                    total=(total_items + batch_size - 1) // batch_size,
-                    desc="Generating",
-                )
-            except Exception:
-                pass
+            range_iter = tqdm(
+                range_iter,
+                total=(total_items + batch_size - 1) // batch_size,
+                desc="Generating",
+            )
 
         for start in range_iter:
             end = min(start + batch_size, total_items)
@@ -283,6 +279,7 @@ class GRPOInference:
                 generated_ids_i = output_ids[i][input_len_i:]
                 full_text = self.tokenizer.decode(generated_ids_i, skip_special_tokens=True)
                 answer_text = extract_answer(full_text)
+                logger.info("Adversarial sentence: %s", answer_text)
                 results.append(
                     {
                         "prompt": prompt_text,
