@@ -171,7 +171,9 @@ class GRPOInference:
             output_ids = self.model.generate(**inputs, **gen_kwargs)
 
         # We generated continuation for the full prompt; the first item is the sequence
-        full_text = self.tokenizer.decode(output_ids[0], skip_special_tokens=True)
+        full_text = self.tokenizer.decode(
+            outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True
+        )
 
         # Extract only the assistant completion portion when chat template is used
         # If unavailable, fall back to extracting the <answer> block from the tail
