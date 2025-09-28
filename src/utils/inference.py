@@ -264,19 +264,12 @@ class GRPOInference:
             with torch.no_grad():
                 output_ids = self.model.generate(**inputs, **gen_kwargs)
 
-            attention_mask = inputs.get("attention_mask")
-
-            # Compute decoded outputs per-example, slicing off the prompt length
-            if attention_mask is not None:
-                input_lengths = attention_mask.sum(dim=1).tolist()
-            else:
-                # Fallback: assume no padding
-                input_lengths = [inputs["input_ids"].shape[1]] * (end - start)
+            # Slice off the full padded input width (same for all items in the batch)
+            prompt_padded_len = int(inputs["input_ids"].shape[1])
 
             for i in range(end - start):
                 prompt_text = batch_prompts[i]
-                input_len_i = int(input_lengths[i])
-                generated_ids_i = output_ids[i][input_len_i:]
+                generated_ids_i = output_ids[i][prompt_padded_len:]
                 full_text = self.tokenizer.decode(generated_ids_i, skip_special_tokens=True)
                 answer_text = extract_answer(full_text)
                 results.append(
