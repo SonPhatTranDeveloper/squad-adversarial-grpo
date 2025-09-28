@@ -9,7 +9,7 @@ def main() -> int:
     adapter_path = "outputs/qwen2.5-3b-grpo/checkpoint-2000"
     device_map = "cuda"
     dtype = torch.bfloat16
-    max_new_tokens = 128
+    max_new_tokens = 512
     temperature = 1.0
     top_p = 0.9
     do_sample = True
