@@ -4,7 +4,7 @@ from src.utils.inference import GRPOInference
 
 
 def main() -> int:
-    # Fixed configuration
+    # Define model and adapter
     model_id = "Qwen/Qwen2.5-3B-Instruct"
     adapter_path = "models/qwen2.5-3b-grpo"
     device_map = "cuda"
@@ -14,10 +14,11 @@ def main() -> int:
     top_p = 0.9
     do_sample = True
 
-    # Fixed inputs
+    # Define context and question
     context = "Paris is the capital of France."
     question = "What is the capital of France?"
 
+    # Define inference
     infer = GRPOInference(
         model_id=model_id,
         adapter_path=adapter_path,
@@ -29,6 +30,7 @@ def main() -> int:
         do_sample=do_sample,
     )
 
+    # Generate adversarial sentence
     result = infer.generate_one(context=context, question=question)
     print(result["answer"])
 
