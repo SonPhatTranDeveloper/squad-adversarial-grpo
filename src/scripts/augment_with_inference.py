@@ -1,6 +1,8 @@
 import argparse
 import logging
 import os
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 import torch
@@ -56,6 +58,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--do_sample", action="store_true", help="Enable sampling")
     parser.set_defaults(do_sample=True)
 
+    parser.add_argument(
+        "--num_workers",
+        type=int,
+        default=32,
+        help="Number of worker threads for concurrent inference",
+    )
+
     return parser.parse_args()
 
 
@@ -81,7 +90,9 @@ def build_infer(args: argparse.Namespace) -> GRPOInference:
     )
 
 
-def prepend_answer_to_question(df: pd.DataFrame, infer: GRPOInference) -> pd.DataFrame:
+def prepend_answer_to_question(
+    df: pd.DataFrame, infer: GRPOInference, num_workers: int
+) -> pd.DataFrame:
     """
     Prepend the adversarial sentence to the question.
 
@@ -92,18 +103,28 @@ def prepend_answer_to_question(df: pd.DataFrame, infer: GRPOInference) -> pd.Dat
     Returns:
         A dataframe with the augmented questions.
     """
-    augmented_questions: list[str] = []
-    for _, row in tqdm(df.iterrows(), total=len(df), desc="Augmenting"):
-        context: str = row["context"]
-        question: str = row["question"]
+    augmented_questions: list[str] = [""] * len(df)
 
-        result = infer.generate_one(context=context, question=question)
+    # Optional lock if the underlying model/generator is not thread-safe.
+    generate_lock = threading.Lock()
+
+    def process_row(index: int, context: str, question: str) -> tuple[int, str]:
+        # If model inference is not thread-safe, guard the call with a lock.
+        with generate_lock:
+            result = infer.generate_one(context=context, question=question)
         adv_sentence = format_sentence(result.get("answer", ""))
-
         logger.info("Adversarial sentence: %s", adv_sentence)
-
         new_question = f"{adv_sentence}{question}" if adv_sentence else question
-        augmented_questions.append(new_question)
+        return index, new_question
+
+    with ThreadPoolExecutor(max_workers=max(1, num_workers)) as executor:
+        futures = []
+        for idx, row in df.iterrows():
+            futures.append(executor.submit(process_row, idx, row["context"], row["question"]))
+
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Augmenting"):
+            index, new_question = future.result()
+            augmented_questions[index] = new_question
 
     df_out = df.copy()
     df_out["question"] = augmented_questions
@@ -131,7 +152,7 @@ def main() -> None:
     df = pd.read_csv(args.input_path)
     infer = build_infer(args)
 
-    df_out = prepend_answer_to_question(df, infer)
+    df_out = prepend_answer_to_question(df, infer, args.num_workers)
     df_out.to_csv(args.output_path, index=False)
 
 
